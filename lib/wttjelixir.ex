@@ -17,10 +17,10 @@ defmodule Wttjelixir do
     |> Enum.drop(1)
   end
   
-  def group_jobs_by_type_and_category(joblist) do
-    joblist
+  def group_jobs_by_type_and_category(jobs) do
+    jobs
     |> Enum.map(fn(x) -> 
-      [List.first(x), Enum.at(x,1)]
+      [Enum.at(x,0), Enum.at(x,1)]
     end)
     |> Enum.group_by(fn(x) -> 
       {Enum.at(x,1), Enum.at(x,0)}
@@ -36,8 +36,8 @@ defmodule Wttjelixir do
     |> List.last()
   end
   
-  def replace_jobid_by_category(joblist, professions) do
-    joblist
+  def replace_jobid_by_category(jobs, professions) do
+    jobs
     |> Enum.map(fn(x) ->
       List.replace_at(x,0, get_category_by_job(professions, Enum.at(x, 0))) 
     end)
@@ -45,11 +45,57 @@ defmodule Wttjelixir do
   
   def count_jobs_by_type_and_category(jobs, professions) do
     jobs_replaced = replace_jobid_by_category(jobs,professions)
-    map_grouped = group_jobs_by_type_and_category(jobs_replaced)
-    
-    Enum.sort(Enum.map(map_grouped, fn ({key, value}) ->   
-      [Tuple.to_list(key), length(value)] 
-    end))
+    group_jobs_by_type_and_category(jobs_replaced)
+    |> Enum.map(fn {key, value} -> [Tuple.to_list(key), length(value)] end)
+    |> Enum.sort()
+    |> List.flatten()
+    |> Enum.chunk_every(3)
+    |> Enum.map(fn [a,b,c] -> {{a, b},c} end)
+    |> Map.new()
   end
-  
+
+  def get_table_of_totals_from_csv() do
+    jobs = map_csv(jobs_csv())
+    professions = map_csv(professions_csv())
+    count_jobs_by_type_and_category(jobs, professions)
+  end
+
+  def get_all_types(map_counters) do
+    map_counters 
+    |> Enum.group_by(fn {{a,_b},_c} -> a end) 
+    |> Map.keys()
+  end
+
+  def get_all_categories(map_counters) do
+    map_counters 
+    |> Enum.group_by(fn {{_a,b},_c} -> b end) 
+    |> Map.keys()
+  end
+
+  def format_headers(list_categories) do
+    keys_display = Enum.map(list_categories, fn(x) -> 
+      x <> unless(String.length(x) > 13, 
+      do: String.duplicate(" ",14 - String.length(x)),
+    else: " "
+      ) 
+    end)
+    IO.puts(String.duplicate("-", 16 + (String.length(Enum.join(keys_display))) + 2 * length(keys_display)))
+    IO.puts("|" <> String.duplicate(" ", 15) <> "| " <> Enum.join(keys_display, "| ") <> "|")
+    IO.puts(String.duplicate("-", 16 + (String.length(Enum.join(keys_display))) + 2 * length(keys_display)))
+  end
+
+  def display_counts_by_categories_and_type_from_csv() do
+    map_counters = get_table_of_totals_from_csv()
+    types = get_all_types(map_counters)
+    categories = get_all_categories(map_counters)
+    
+  end
+
+  # def map_counts_by_category_and_type(jobs, professions) do
+  #   table_counts = Wttjelixir.count_jobs_by_type_and_category(jobs, professions)
+  #   flat = Enum.map(table_counts, fn(x) -> List.flatten(x) end) 
+  #   grouped = Enum.group_by(flat, &(Enum.at(&1,1)))
+  # end
+
+
 end

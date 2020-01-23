@@ -1,5 +1,7 @@
 defmodule WttjelixirTest do
   use ExUnit.Case
+  import ExUnit.CaptureIO
+
   
   doctest Wttjelixir
 
@@ -38,10 +40,41 @@ defmodule WttjelixirTest do
     jobs = Wttjelixir.map_csv(Wttjelixir.jobs_csv())
     professions = Wttjelixir.map_csv(Wttjelixir.professions_csv())
     table_counts = Wttjelixir.count_jobs_by_type_and_category(jobs, professions) 
-    assert length(table_counts) >= 1
-    assert List.first(table_counts) == [["APPRENTICESHIP", ""], 4]
-    assert List.last(table_counts) == [["VIE", "Tech"], 1]
+    assert is_map(table_counts)
+    assert Map.get(table_counts, {"APPRENTICESHIP", "Conseil"}) == 8
+    assert Map.get(table_counts, {"VIE", "Tech"}) == 1
+    assert Map.get(table_counts, {"FULL_TIME", ""}) == 37
   end
 
+  test "should return the list of types from table of totals" do
+    table = Wttjelixir.get_table_of_totals_from_csv()
+    types = Wttjelixir.get_all_types(table)
+    assert types == ["APPRENTICESHIP", "FREELANCE", "FULL_TIME", "INTERNSHIP", "PART_TIME", "TEMPORARY", "VIE"]
+  end
 
+  test "should return the list of categories from table of totals" do
+    table = Wttjelixir.get_table_of_totals_from_csv()
+    types = Wttjelixir.get_all_categories(table)
+    assert types == ["", "Admin", "Business", "Conseil", "Créa", "Marketing / Comm'", "Retail", "Tech"]
+  end
+
+  test "should display header with list of categories" do
+    assert capture_io(fn ->
+      Wttjelixir.format_headers(["Tech"])
+    end) == """
+    --------------------------------
+    |               | Tech          |
+    --------------------------------
+    """ 
+  end
+
+  test "should display header with all categories from csv" do
+    assert capture_io(fn ->
+      Wttjelixir.format_headers(Wttjelixir.get_all_categories(Wttjelixir.get_table_of_totals_from_csv()))
+    end) == """
+    ----------------------------------------------------------------------------------------------------------------------------------------------------
+    |               |               | Admin         | Business      | Conseil       | Créa          | Marketing / Comm' | Retail        | Tech          |
+    ----------------------------------------------------------------------------------------------------------------------------------------------------
+    """
+  end
 end
