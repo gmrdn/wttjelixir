@@ -98,8 +98,9 @@ defmodule Wttjelixir do
         total = Map.get(map_counters,{t,c})
         " " <> 
         if(!!total, 
-        do: Integer.to_string(total) <> String.duplicate(" ", 14 - String.length(Integer.to_string(total))), 
-        else: "0             " )
+        do: Integer.to_string(total) <> 
+        String.duplicate(" ", if(String.length(c) < 13, do: 14, else: String.length(c) + 1) - String.length(Integer.to_string(total))), 
+        else: "0" <> String.duplicate(" ", if(String.length(c) < 13, do: 14, else: String.length(c) +1 ) - 1))
         <> "|"
       end) 
       IO.puts(row)

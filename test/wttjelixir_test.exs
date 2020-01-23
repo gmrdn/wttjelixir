@@ -95,4 +95,13 @@ defmodule WttjelixirTest do
     --------------------------------
     """ 
   end
+
+  test "should enlarge the column width when the category is longer" do
+    assert capture_io(fn ->
+      Wttjelixir.format_body(["FULL_TIME"],["Marketing and Communication"],%{{"FULL_TIME", "Marketing and Communication"} => 1114})
+    end) == """
+    | FULL_TIME     | 1114                        |
+    ----------------------------------------------
+    """ 
+  end
 end
