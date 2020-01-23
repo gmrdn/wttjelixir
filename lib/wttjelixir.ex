@@ -74,28 +74,45 @@ defmodule Wttjelixir do
 
   def format_headers(list_categories) do
     keys_display = Enum.map(list_categories, fn(x) -> 
-      x <> unless(String.length(x) > 13, 
+      x <> 
+      unless(String.length(x) > 13, 
       do: String.duplicate(" ",14 - String.length(x)),
-    else: " "
-      ) 
+      else: " ") 
     end)
     IO.puts(String.duplicate("-", 16 + (String.length(Enum.join(keys_display))) + 2 * length(keys_display)))
     IO.puts("|" <> String.duplicate(" ", 15) <> "| " <> Enum.join(keys_display, "| ") <> "|")
     IO.puts(String.duplicate("-", 16 + (String.length(Enum.join(keys_display))) + 2 * length(keys_display)))
   end
 
+  def format_body(types, categories, map_counters) do
+    keys_display = Enum.map(categories, fn(x) -> 
+      x <> 
+      unless(String.length(x) > 13, 
+      do: String.duplicate(" ",14 - String.length(x)),
+      else: " ") 
+    end)
+
+    Enum.each(types, fn(t) -> 
+      row = "| " <> t <> String.duplicate(" ", 14 - String.length(t)) <> "|" <>
+      Enum.map_join(categories, fn(c) ->
+        total = Map.get(map_counters,{t,c})
+        " " <> 
+        if(!!total, 
+        do: Integer.to_string(total) <> String.duplicate(" ", 14 - String.length(Integer.to_string(total))), 
+        else: "0             " )
+        <> "|"
+      end) 
+      IO.puts(row)
+      IO.puts(String.duplicate("-", 16 + (String.length(Enum.join(keys_display))) + 2 * length(keys_display)))
+    end)
+  end
+
   def display_counts_by_categories_and_type_from_csv() do
     map_counters = get_table_of_totals_from_csv()
     types = get_all_types(map_counters)
     categories = get_all_categories(map_counters)
-    
+    format_headers(categories)
+    format_body(types, categories, map_counters)
   end
-
-  # def map_counts_by_category_and_type(jobs, professions) do
-  #   table_counts = Wttjelixir.count_jobs_by_type_and_category(jobs, professions)
-  #   flat = Enum.map(table_counts, fn(x) -> List.flatten(x) end) 
-  #   grouped = Enum.group_by(flat, &(Enum.at(&1,1)))
-  # end
-
 
 end

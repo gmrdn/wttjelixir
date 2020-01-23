@@ -77,4 +77,22 @@ defmodule WttjelixirTest do
     ----------------------------------------------------------------------------------------------------------------------------------------------------
     """
   end
+
+  test "should display counters" do
+    assert capture_io(fn ->
+      Wttjelixir.format_body(["FULL_TIME"],["Tech"],%{{"FULL_TIME", "Tech"} => 1114})
+    end) == """
+    | FULL_TIME     | 1114          |
+    --------------------------------
+    """ 
+  end
+
+  test "should display zero when no job available for category and type" do
+    assert capture_io(fn ->
+      Wttjelixir.format_body(["FULL_TIME"],["Tech"],%{{"TEMPORARY", "Tech"} => 1114})
+    end) == """
+    | FULL_TIME     | 0             |
+    --------------------------------
+    """ 
+  end
 end
