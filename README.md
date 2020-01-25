@@ -1,21 +1,14 @@
 # Wttjelixir
 
-**TODO: Add description**
+Test Technique // QA Engineer
+01 / 03 . Exercice 1 : code & tests unitaires
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `wttjelixir` to your list of dependencies in `mix.exs`:
+Affichage du résultat :
 
-```elixir
-def deps do
-  [
-    {:wttjelixir, "~> 0.1.0"}
-  ]
-end
-```
+ies -S mix
+iex(1)> Wttjelixir.display_counts_by_categories_and_type_from_csv
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/wttjelixir](https://hexdocs.pm/wttjelixir).
-
+Tests unitaires :
+mix test
