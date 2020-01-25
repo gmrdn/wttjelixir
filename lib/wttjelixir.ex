@@ -1,5 +1,4 @@
 defmodule Wttjelixir do
-  
   @filepath "data/"
 
   def professions_csv do
@@ -72,39 +71,46 @@ defmodule Wttjelixir do
     |> Map.keys()
   end
 
-  def format_headers(list_categories) do
-    keys_display = Enum.map(list_categories, fn(x) -> 
+  def format_headers(categories) do
+    categories_display = format_categories(categories)
+    display_horizontal_bar(16, categories_display)    
+    IO.puts("|" <> String.duplicate(" ", 15) <> "| " <> Enum.join(categories_display, "| ") <> "|")
+    display_horizontal_bar(16, categories_display)    
+  end
+
+  def format_categories(categories) do
+    Enum.map(categories, fn(x) -> 
       x <> 
-      unless(String.length(x) > 13, 
-      do: String.duplicate(" ",14 - String.length(x)),
-      else: " ") 
+      if String.length(x) < 13 do
+        String.duplicate(" ", 14 - String.length(x))
+      else
+        " "
+      end 
     end)
-    IO.puts(String.duplicate("-", 16 + (String.length(Enum.join(keys_display))) + 2 * length(keys_display)))
-    IO.puts("|" <> String.duplicate(" ", 15) <> "| " <> Enum.join(keys_display, "| ") <> "|")
-    IO.puts(String.duplicate("-", 16 + (String.length(Enum.join(keys_display))) + 2 * length(keys_display)))
+  end
+
+  def display_horizontal_bar(first_col_width, list_headers) do
+    IO.puts(String.duplicate("-", first_col_width + (String.length(Enum.join(list_headers))) + 2 * length(list_headers)))
   end
 
   def format_body(types, categories, map_counters) do
-    keys_display = Enum.map(categories, fn(x) -> 
-      x <> 
-      unless(String.length(x) > 13, 
-      do: String.duplicate(" ",14 - String.length(x)),
-      else: " ") 
-    end)
+    categories_display = format_categories(categories)
 
     Enum.each(types, fn(t) -> 
       row = "| " <> t <> String.duplicate(" ", 14 - String.length(t)) <> "|" <>
       Enum.map_join(categories, fn(c) ->
         total = Map.get(map_counters,{t,c})
         " " <> 
-        if(!!total, 
-        do: Integer.to_string(total) <> 
-        String.duplicate(" ", if(String.length(c) < 13, do: 14, else: String.length(c) + 1) - String.length(Integer.to_string(total))), 
-        else: "0" <> String.duplicate(" ", if(String.length(c) < 13, do: 14, else: String.length(c) +1 ) - 1))
+        if !!total do
+          Integer.to_string(total) <> 
+          String.duplicate(" ", if(String.length(c) < 13, do: 14, else: String.length(c) + 1) - String.length(Integer.to_string(total))) 
+        else
+          "0" <> String.duplicate(" ", if(String.length(c) < 13, do: 14, else: String.length(c) + 1 ) - 1)
+        end
         <> "|"
-      end) 
+      end)
       IO.puts(row)
-      IO.puts(String.duplicate("-", 16 + (String.length(Enum.join(keys_display))) + 2 * length(keys_display)))
+      display_horizontal_bar(16, categories_display)    
     end)
   end
 
