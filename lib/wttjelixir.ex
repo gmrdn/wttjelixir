@@ -74,7 +74,7 @@ defmodule Wttjelixir do
   def format_headers(categories) do
     categories_display = format_categories(categories)
     display_horizontal_bar(16, categories_display)    
-    IO.puts("|" <> String.duplicate(" ", 15) <> "| " <> Enum.join(categories_display, "| ") <> "|")
+    IO.puts("|" <> String.duplicate(" ", 15) <> "| Total         | " <> Enum.join(categories_display, "| ") <> "|")
     display_horizontal_bar(16, categories_display)    
   end
 
@@ -90,20 +90,25 @@ defmodule Wttjelixir do
   end
 
   def display_horizontal_bar(first_col_width, list_headers) do
-    IO.puts(String.duplicate("-", first_col_width + (String.length(Enum.join(list_headers))) + 2 * length(list_headers)))
+    IO.puts(String.duplicate("-", first_col_width + 16 + (String.length(Enum.join(list_headers))) + 2 * length(list_headers)))
   end
 
   def format_body(types, categories, map_counters) do
     categories_display = format_categories(categories)
 
     Enum.each(types, fn(t) -> 
-      row = "| " <> t <> String.duplicate(" ", 14 - String.length(t)) <> "|" <>
+      total_for_type = Integer.to_string(Enum.sum(Enum.map(map_counters, fn {{a,_b},c} -> if(a == t, do: c, else: 0) end))) 
+      
+      row = "| " <> t <> String.duplicate(" ", 14 - String.length(t)) <> "|" <> 
+      " " <> total_for_type
+      <> String.duplicate(" ", 14 - String.length(total_for_type)) <> "|" <> 
+      
       Enum.map_join(categories, fn(c) ->
-        total = Map.get(map_counters,{t,c})
-        " " <> 
-        if !!total do
-          Integer.to_string(total) <> 
-          String.duplicate(" ", if(String.length(c) < 13, do: 14, else: String.length(c) + 1) - String.length(Integer.to_string(total))) 
+        nb_jobs_for_category_and_type = Map.get(map_counters,{t,c})
+        " " <>  
+        if !!nb_jobs_for_category_and_type do
+          Integer.to_string(nb_jobs_for_category_and_type) <> 
+          String.duplicate(" ", if(String.length(c) < 13, do: 14, else: String.length(c) + 1) - String.length(Integer.to_string(nb_jobs_for_category_and_type))) 
         else
           "0" <> String.duplicate(" ", if(String.length(c) < 13, do: 14, else: String.length(c) + 1 ) - 1)
         end

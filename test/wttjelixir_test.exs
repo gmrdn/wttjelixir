@@ -62,9 +62,9 @@ defmodule WttjelixirTest do
     assert capture_io(fn ->
       Wttjelixir.format_headers(["Tech"])
     end) == """
-    --------------------------------
-    |               | Tech          |
-    --------------------------------
+    ------------------------------------------------
+    |               | Total         | Tech          |
+    ------------------------------------------------
     """ 
   end
 
@@ -72,9 +72,9 @@ defmodule WttjelixirTest do
     assert capture_io(fn ->
       Wttjelixir.format_headers(Wttjelixir.get_all_categories(Wttjelixir.get_table_of_totals_from_csv()))
     end) == """
-    ----------------------------------------------------------------------------------------------------------------------------------------------------
-    |               |               | Admin         | Business      | Conseil       | Créa          | Marketing / Comm' | Retail        | Tech          |
-    ----------------------------------------------------------------------------------------------------------------------------------------------------
+    --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    |               | Total         |               | Admin         | Business      | Conseil       | Créa          | Marketing / Comm' | Retail        | Tech          |
+    --------------------------------------------------------------------------------------------------------------------------------------------------------------------
     """
   end
 
@@ -82,8 +82,8 @@ defmodule WttjelixirTest do
     assert capture_io(fn ->
       Wttjelixir.format_body(["FULL_TIME"],["Tech"],%{{"FULL_TIME", "Tech"} => 1114})
     end) == """
-    | FULL_TIME     | 1114          |
-    --------------------------------
+    | FULL_TIME     | 1114          | 1114          |
+    ------------------------------------------------
     """ 
   end
 
@@ -91,8 +91,8 @@ defmodule WttjelixirTest do
     assert capture_io(fn ->
       Wttjelixir.format_body(["FULL_TIME"],["Tech"],%{{"TEMPORARY", "Tech"} => 1114})
     end) == """
-    | FULL_TIME     | 0             |
-    --------------------------------
+    | FULL_TIME     | 0             | 0             |
+    ------------------------------------------------
     """ 
   end
 
@@ -100,8 +100,8 @@ defmodule WttjelixirTest do
     assert capture_io(fn ->
       Wttjelixir.format_body(["FULL_TIME"],["Marketing and Communication"],%{{"FULL_TIME", "Marketing and Communication"} => 1114})
     end) == """
-    | FULL_TIME     | 1114                        |
-    ----------------------------------------------
+    | FULL_TIME     | 1114          | 1114                        |
+    --------------------------------------------------------------
     """ 
   end
 end
