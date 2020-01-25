@@ -71,51 +71,75 @@ defmodule Wttjelixir do
     |> Map.keys()
   end
 
-  def format_headers(categories) do
+  def display_headers(categories) do
     categories_display = format_categories(categories)
-    display_horizontal_bar(16, categories_display)    
-    IO.puts("|" <> String.duplicate(" ", 15) <> "| Total         | " <> Enum.join(categories_display, "| ") <> "|")
-    display_horizontal_bar(16, categories_display)    
+    display_horizontal_bar(20, categories_display)    
+    IO.puts("|" <> String.duplicate(" ", 19) <> "| Total         | " <> Enum.join(categories_display, "| ") <> "|")
+    display_horizontal_bar(20, categories_display)    
+  end
+
+  def display_total_by_categories(categories, map_counters) do
+    categories_display = format_categories(categories)
+    total = Integer.to_string(Enum.sum(Enum.map(map_counters, fn {{_a,_b},c} -> c end)))
+    row = "| TOTAL             | " <> total
+    <> add_spaces(total, 14) <> "|" <>
+    Enum.map_join(categories, fn(category) ->
+      total_cat = Integer.to_string(Enum.sum(Enum.map(map_counters, fn {{_a,b},c} -> if(b == category, do: c, else: 0) end)))
+      " " <> total_cat <> add_spaces(total_cat, if(String.length(category) < 13, do: 14, else: String.length(category) + 1))
+      <> "|"
+    end)
+    IO.puts(row)
+    display_horizontal_bar(20, categories_display)    
   end
 
   def format_categories(categories) do
     Enum.map(categories, fn(x) -> 
-      x <> 
-      if String.length(x) < 13 do
-        String.duplicate(" ", 14 - String.length(x))
+      if x == "" do
+        "N/A" <> add_spaces("N/A", 14)
       else
-        " "
-      end 
+        x <> add_spaces(x, 14)
+      end    
     end)
   end
 
+  def add_spaces(value, col_width) do 
+    if String.length(value) < col_width do
+      String.duplicate(" ", col_width - String.length(value))
+    else
+      " "
+    end 
+  end
   def display_horizontal_bar(first_col_width, list_headers) do
     IO.puts(String.duplicate("-", first_col_width + 16 + (String.length(Enum.join(list_headers))) + 2 * length(list_headers)))
   end
 
-  def format_body(types, categories, map_counters) do
+  def format_type(first_col_width, type) do 
+    "| " <> type <> add_spaces(type, first_col_width - 2) <> "| "
+  end
+
+  def display_body(types, categories, map_counters) do
     categories_display = format_categories(categories)
 
-    Enum.each(types, fn(t) -> 
-      total_for_type = Integer.to_string(Enum.sum(Enum.map(map_counters, fn {{a,_b},c} -> if(a == t, do: c, else: 0) end))) 
-      
-      row = "| " <> t <> String.duplicate(" ", 14 - String.length(t)) <> "|" <> 
-      " " <> total_for_type
-      <> String.duplicate(" ", 14 - String.length(total_for_type)) <> "|" <> 
+    Enum.each(types, fn(type) -> 
+      total_for_type = Integer.to_string(Enum.sum(Enum.map(map_counters, fn {{a,_b},c} -> if(a == type, do: c, else: 0) end))) 
+      row = format_type(20, type)
+      <> total_for_type
+      <> add_spaces(total_for_type, 14) <> "|" <> 
       
       Enum.map_join(categories, fn(c) ->
-        nb_jobs_for_category_and_type = Map.get(map_counters,{t,c})
-        " " <>  
+        nb_jobs_for_category_and_type = Map.get(map_counters,{type,c})
+        " " <> 
         if !!nb_jobs_for_category_and_type do
           Integer.to_string(nb_jobs_for_category_and_type) <> 
-          String.duplicate(" ", if(String.length(c) < 13, do: 14, else: String.length(c) + 1) - String.length(Integer.to_string(nb_jobs_for_category_and_type))) 
+          add_spaces(Integer.to_string(nb_jobs_for_category_and_type), if(String.length(c) < 13, do: 14, else: String.length(c) + 1))
         else
-          "0" <> String.duplicate(" ", if(String.length(c) < 13, do: 14, else: String.length(c) + 1 ) - 1)
+          "0" <> add_spaces("0", if(String.length(c) < 13, do: 14, else: String.length(c) + 1 ))
         end
         <> "|"
       end)
+
       IO.puts(row)
-      display_horizontal_bar(16, categories_display)    
+      display_horizontal_bar(20, categories_display)    
     end)
   end
 
@@ -123,8 +147,9 @@ defmodule Wttjelixir do
     map_counters = get_table_of_totals_from_csv()
     types = get_all_types(map_counters)
     categories = get_all_categories(map_counters)
-    format_headers(categories)
-    format_body(types, categories, map_counters)
+    display_headers(categories)
+    display_total_by_categories(categories, map_counters)
+    display_body(types, categories, map_counters)
   end
 
 end

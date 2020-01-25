@@ -60,48 +60,60 @@ defmodule WttjelixirTest do
 
   test "should display header with list of categories" do
     assert capture_io(fn ->
-      Wttjelixir.format_headers(["Tech"])
+      Wttjelixir.display_headers(["Tech"])
     end) == """
-    ------------------------------------------------
-    |               | Total         | Tech          |
-    ------------------------------------------------
+    ----------------------------------------------------
+    |                   | Total         | Tech          |
+    ----------------------------------------------------
     """ 
   end
 
   test "should display header with all categories from csv" do
     assert capture_io(fn ->
-      Wttjelixir.format_headers(Wttjelixir.get_all_categories(Wttjelixir.get_table_of_totals_from_csv()))
+      Wttjelixir.display_headers(Wttjelixir.get_all_categories(Wttjelixir.get_table_of_totals_from_csv()))
     end) == """
-    --------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    |               | Total         |               | Admin         | Business      | Conseil       | Créa          | Marketing / Comm' | Retail        | Tech          |
-    --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    |                   | Total         | N/A           | Admin         | Business      | Conseil       | Créa          | Marketing / Comm' | Retail        | Tech          |
+    ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     """
   end
 
   test "should display counters" do
     assert capture_io(fn ->
-      Wttjelixir.format_body(["FULL_TIME"],["Tech"],%{{"FULL_TIME", "Tech"} => 1114})
+      Wttjelixir.display_body(["FULL_TIME"],["Tech"],%{{"FULL_TIME", "Tech"} => 1114})
     end) == """
-    | FULL_TIME     | 1114          | 1114          |
-    ------------------------------------------------
+    | FULL_TIME         | 1114          | 1114          |
+    ----------------------------------------------------
     """ 
   end
 
   test "should display zero when no job available for category and type" do
     assert capture_io(fn ->
-      Wttjelixir.format_body(["FULL_TIME"],["Tech"],%{{"TEMPORARY", "Tech"} => 1114})
+      Wttjelixir.display_body(["FULL_TIME"],["Tech"],%{{"TEMPORARY", "Tech"} => 1114})
     end) == """
-    | FULL_TIME     | 0             | 0             |
-    ------------------------------------------------
+    | FULL_TIME         | 0             | 0             |
+    ----------------------------------------------------
     """ 
   end
 
   test "should enlarge the column width when the category is longer" do
     assert capture_io(fn ->
-      Wttjelixir.format_body(["FULL_TIME"],["Marketing and Communication"],%{{"FULL_TIME", "Marketing and Communication"} => 1114})
+      Wttjelixir.display_body(["FULL_TIME"],["Marketing and Communication"],%{{"FULL_TIME", "Marketing and Communication"} => 1114})
     end) == """
-    | FULL_TIME     | 1114          | 1114                        |
-    --------------------------------------------------------------
+    | FULL_TIME         | 1114          | 1114                        |
+    ------------------------------------------------------------------
     """ 
+  end
+
+  test "should display the total for each category" do
+    assert capture_io(fn ->
+      Wttjelixir.display_total_by_categories(["Tech", "Marketing and Communication"],
+      %{{"APPRENTICESHIP", "Tech"} => 85,
+        {"FULL_TIME", "Marketing and Communication"} => 277, 
+        {"FULL_TIME", "Tech"} => 1114})
+    end) == """
+    | TOTAL             | 1476          | 1199          | 277                         |
+    ----------------------------------------------------------------------------------
+    """
   end
 end
